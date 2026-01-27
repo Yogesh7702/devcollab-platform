@@ -8,6 +8,7 @@ const Signup = () => {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const { user, isLoading, error } = useSelector((state) => state.auth);
@@ -18,8 +19,15 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+ 
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
     dispatch(registerUser(formData));
   };
 
@@ -48,7 +56,10 @@ const Signup = () => {
             </p>
           </div>
 
-         {error && <p className="text-danger">{error}</p>}
+         {error && !isLoading && !user && (
+  <p className="text-danger">{error}</p>
+)}
+
 
           <form onSubmit={handleSubmit}>
            
@@ -122,7 +133,6 @@ const Signup = () => {
               Login
             </Link>
           </div>
-
         </div>
       </div>
     </div>

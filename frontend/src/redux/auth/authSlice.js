@@ -1,15 +1,19 @@
 import {createSlice} from "@reduxjs/toolkit";
 import {loginUser, registerUser} from "./authAction";
 
-const userfromStorge = JSON.parse(localStorage.getItem("user"));
+const user = JSON.parse(localStorage.getItem("user"));
+
+const initialState = {
+  user: user ? user : null,
+  isLoading: false,
+  isError: false,
+  isSuccess: false,
+  message: "",
+}
 
 const authSlice = createSlice({
     name: "auth",
-    initialState: {
-        user: userfromStorge || null,
-        isLoading: false,
-        error: null,
-    },
+    initialState,
     reducers: {
         logout: (state) => {
             state.user = null;
@@ -24,10 +28,12 @@ const authSlice = createSlice({
         builder
         .addCase(registerUser.pending, (state) => {
             state.isLoading = true;
+            state.error = null;
         })
         .addCase(registerUser.fulfilled, (state, action) => {
             state.isLoading = false;
             state.user = action.payload;
+            state.error = null;
         })
         .addCase(registerUser.rejected, (state, action) => {
             state.isLoading = false;

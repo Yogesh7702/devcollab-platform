@@ -3,29 +3,35 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/auth";
 
-
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, thunkAPI) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${API_URL}/register`,
         userData
       );
 
-      // auto-login after signup
-      localStorage.setItem("user", JSON.stringify(res.data));
+      console.log("REGISTER SUCCESS 👉", res.data); // 🔥 ADD THIS
+      const user = {
+        id: res.data.user.id,
+        name: res.data.user.name,
+        email: res.data.user.email,
+        token: res.data.token,
+      };
 
-      return res.data;
+      
+      localStorage.setItem("user", JSON.stringify(user));
+
+      return user;
     } catch (error) {
+       console.log("REGISTER ERROR 👉", error);
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Signup failed"
       );
     }
   }
 );
-
-
 
 export const loginUser = createAsyncThunk(
   "auth/login",

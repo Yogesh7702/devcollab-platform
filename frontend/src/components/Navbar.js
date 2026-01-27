@@ -24,7 +24,7 @@ import {logout} from "../redux/auth/authSlice";
           DevCollab
         </Link>
 
-        {/* Mobile toggle */}
+     
         <button
           className="navbar-toggler"
           type="button"
@@ -34,7 +34,7 @@ import {logout} from "../redux/auth/authSlice";
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Links */}
+       
         <div className="collapse navbar-collapse" id="devcollabNavbar">
           <ul className="navbar-nav ms-auto align-items-center gap-3">
 
