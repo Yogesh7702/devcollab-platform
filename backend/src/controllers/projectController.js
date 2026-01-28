@@ -26,8 +26,6 @@ export const getProjects = async (req, res) => {
 };
 
 
-import Project from "../models/Project.js";
-
 export const createProject = async (req, res) => {
   try {
     const {
@@ -51,5 +49,18 @@ export const createProject = async (req, res) => {
     res.status(201).json(project);
   } catch (error) {
     res.status(500).json({ message: "Failed to create project" });
+  }
+};
+
+
+export const getMyProjects = async (req, res) => {
+  try {
+    const projects = await Project.find({
+      members: req.user._id,
+    }).sort({createdAt: -1});
+
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({message: "Failed to fetch your projects"});
   }
 };
