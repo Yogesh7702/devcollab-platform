@@ -1,15 +1,74 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setProjects } from "../redux/projects/projectSlice";
 import Navbar from "../components/Navbar";
-import "../styles/#projects.css";
+import ProjectCard from "../components/projects/ProjectCard";
+import "../styles/projects.css";
+
 const Projects = () => {
+  const [selectedTech, setSelectedTech] = useState([]);
+  const [difficulty, setDifficulty] = useState("");
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const demoProjects = [
+    {
+      id: 1,
+      title: "DevCollab Platform",
+      description:
+        "A platform to collaborate with developers, join real-world projects and grow together as a team.",
+      tech: ["React", "Node", "MongoDB"],
+      difficulty: "Intermediate",
+      type: "Startup",
+      membersJoined: 4,
+      membersRequired: 5,
+    },
+    {
+      id: 2,
+      title: "AI Resume Analyzer",
+      description:
+        "Analyze resumes using AI to give feedback, scoring and improvement suggestions.",
+      tech: ["React", "AI"],
+      difficulty: "Advanced",
+      type: "Hackathon",
+    membersJoined: 3,
+    membersRequired: 3,
+    },
+    {
+      id: 3,
+      title: "College Attendance App",
+      description:
+        "A simple app for colleges to track attendance digitally and reduce paperwork.",
+      tech: ["Java", "MongoDB"],
+      difficulty: "Beginner",
+      type: "College",
+      membersJoined: 2,
+      membersRequired: 4,
+    },
+  ];
+
+  const filteredProjects = demoProjects.filter((project) => {
+    const matchTech =
+      selectedTech.length === 0 ||
+      selectedTech.some((tech) => project.tech.includes(tech));
+
+    const matchDifficulty = !difficulty || project.difficulty === difficulty;
+
+    const matchType =
+      projectTypes.length === 0 || projectTypes.includes(project.type);
+
+    const matchSearch = project.title
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    return matchTech && matchDifficulty && matchType && matchSearch;
+  });
+
   return (
     <div className="container-fluid px-4">
       <Navbar />
 
       <div className="row">
-        {/* ===== LEFT SIDEBAR ===== */}
         <div className="col-md-3 col-lg-2 pt-4">
           <div
             className="card border-0 shadow rounded-4 bg-dark text-white"
@@ -38,7 +97,18 @@ const Projects = () => {
                       className="form-check-input fs-5 text-light"
                       type="checkbox"
                       name="tech"
+                      checked={selectedTech.includes(tech)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTech([...selectedTech, tech]);
+                        } else {
+                          setSelectedTech(
+                            selectedTech.filter((t) => t !== tech),
+                          );
+                        }
+                      }}
                     />
+
                     <label
                       className="form-check-label fs-5 text-light"
                       htmlFor={tech}
@@ -58,9 +128,11 @@ const Projects = () => {
                   <div className="form-check mb-1" key={level}>
                     <input
                       className="form-check-input fs-5"
-                      type="radio"
+                      type="checkbox"
                       name="level"
                       id={level}
+                      checked={difficulty === level}
+                      onChange={() => setDifficulty(level)}
                     />
                     <label
                       className="form-check-label fs-5 text-light"
@@ -89,7 +161,18 @@ const Projects = () => {
                       className="form-check-input fs-5"
                       type="checkbox"
                       id={type}
+                      checked={projectTypes.includes(type)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setProjectTypes([...projectTypes, type]);
+                        } else {
+                          setProjectTypes(
+                            projectTypes.filter((t) => t !== type),
+                          );
+                        }
+                      }}
                     />
+
                     <label
                       className="form-check-label text-light fs-5"
                       htmlFor={type}
@@ -98,13 +181,19 @@ const Projects = () => {
                     </label>
                   </div>
                 ))}
+              </div>
 
-                </div>
-
-                <button className="btn btn-outline-secondary w-100 rounded-3">
-                  Clear Filters
-                </button>
-              
+              <button
+                className="btn btn-outline-secondary w-100 rounded-3"
+                onClick={() => {
+                  setSelectedTech([]);
+                  setDifficulty("");
+                  setProjectTypes([]);
+                  setSearch("");
+                }}
+              >
+                Clear Filters
+              </button>
             </div>
           </div>
         </div>
@@ -122,14 +211,20 @@ const Projects = () => {
                 </div>
                 <div className="col-md-4 text-end">
                   <span className="text-muted">
-                    Showing <strong>4</strong> projects
+                    Showing <strong>{filteredProjects.length}</strong> projects
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="row"></div>
+          <div className="row">
+            {demoProjects.map((project) => (
+              <div className="col-md-6 col-lg-4 mb-4" key={project.id}>
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
