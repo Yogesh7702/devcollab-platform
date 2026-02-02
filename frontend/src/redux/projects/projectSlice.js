@@ -1,4 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
+import { createProject } from "./projectAction";
 
 const initialState = {
     projects: [],
@@ -13,6 +14,26 @@ const projectSlice = createSlice({
         setProjects: (state, action) => {
             state.projects = action.payload;
         },
+    },
+
+    extraReducers: (builder) => {
+        builder
+
+        .addCase(createProject.pending, (state) => {
+           state.isLoading = true;
+           state.error = null;
+        })
+
+         .addCase(createProject.fulfilled, (state, action) => {
+   state.isLoading = false;
+   state.projects.push(action.payload); // better
+   state.error = null;
+})
+      
+        .addCase(createProject.rejected, (state, action) => {
+            state.isLoading = false;
+            state.error=  action.payload;
+        })
     },
 });
 

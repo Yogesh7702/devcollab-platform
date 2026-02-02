@@ -1,67 +1,58 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setProjects } from "../redux/projects/projectSlice";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/projects/ProjectCard";
 import "../styles/projects.css";
+import { getProjects } from "../redux/projects/projectAction";
 
 const Projects = () => {
+  const dispatch = useDispatch();
+
+  const { projects = [], isLoading } = useSelector(
+    (state) => state.projects
+  );
+
   const [selectedTech, setSelectedTech] = useState([]);
   const [difficulty, setDifficulty] = useState("");
   const [projectTypes, setProjectTypes] = useState([]);
   const [search, setSearch] = useState("");
 
-  const demoProjects = [
-    {
-      id: 1,
-      title: "DevCollab Platform",
-      description:
-        "A platform to collaborate with developers, join real-world projects and grow together as a team.",
-      tech: ["React", "Node", "MongoDB"],
-      difficulty: "Intermediate",
-      type: "Startup",
-      membersJoined: 4,
-      membersRequired: 5,
-    },
-    {
-      id: 2,
-      title: "AI Resume Analyzer",
-      description:
-        "Analyze resumes using AI to give feedback, scoring and improvement suggestions.",
-      tech: ["React", "AI"],
-      difficulty: "Advanced",
-      type: "Hackathon",
-    membersJoined: 3,
-    membersRequired: 3,
-    },
-    {
-      id: 3,
-      title: "College Attendance App",
-      description:
-        "A simple app for colleges to track attendance digitally and reduce paperwork.",
-      tech: ["Java", "MongoDB"],
-      difficulty: "Beginner",
-      type: "College",
-      membersJoined: 2,
-      membersRequired: 4,
-    },
-  ];
+  // 🔥 FETCH PROJECTS
+  useEffect(() => {
+    dispatch(getProjects());
+  }, [dispatch]);
 
-  const filteredProjects = demoProjects.filter((project) => {
+  console.log("projects =", projects);
+
+  // 🔥 FILTER LOGIC (BACKEND SAFE)
+  const filteredProjects = projects
+  .filter((project) => project)  
+  .filter((project) => {
+    
     const matchTech =
-      selectedTech.length === 0 ||
-      selectedTech.some((tech) => project.tech.includes(tech));
+  selectedTech.length === 0 ||
+  selectedTech.some((tech) =>
+    project?.techStack?.includes(tech)
+  );
 
-    const matchDifficulty = !difficulty || project.difficulty === difficulty;
+    const matchDifficulty =
+      !difficulty || project.difficulty === difficulty;
 
     const matchType =
-      projectTypes.length === 0 || projectTypes.includes(project.type);
+      projectTypes.length === 0 ||
+      projectTypes.includes(project.goal);
 
-    const matchSearch = project.title
-      .toLowerCase()
-      .includes(search.toLowerCase());
+   const matchSearch =
+  project?.title
+    ?.toLowerCase()
+    .includes(search.toLowerCase());
 
-    return matchTech && matchDifficulty && matchType && matchSearch;
+    return (
+      matchTech &&
+      matchDifficulty &&
+      matchType &&
+      matchSearch
+    );
   });
 
   return (
@@ -69,14 +60,14 @@ const Projects = () => {
       <Navbar />
 
       <div className="row">
+        
         <div className="col-md-3 col-lg-2 pt-4">
           <div
             className="card border-0 shadow rounded-4 bg-dark text-white"
             style={{ minHeight: "100vh" }}
           >
             <div className="card-body">
-              {/* <h4 className="fw-bold mb-3">Filters</h4> */}
-
+              
               <div className="mb-4">
                 <p className="fw-semibold mb-4 fs-3 text-center text-primary">
                   Tech Stack
@@ -84,41 +75,33 @@ const Projects = () => {
 
                 {[
                   "React",
-                  "Node",
+                  "Node.js",
                   "MongoDB",
                   "Express",
-                  "Javascript",
-                  "html, css",
                   "Java",
-                  "AI",
+                  "Python",
                 ].map((tech) => (
                   <div className="form-check mb-1" key={tech}>
                     <input
-                      className="form-check-input fs-5 text-light"
+                      className="form-check-input fs-5"
                       type="checkbox"
-                      name="tech"
                       checked={selectedTech.includes(tech)}
                       onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedTech([...selectedTech, tech]);
-                        } else {
-                          setSelectedTech(
-                            selectedTech.filter((t) => t !== tech),
-                          );
-                        }
+                        setSelectedTech((prev) =>
+                          e.target.checked
+                            ? [...prev, tech]
+                            : prev.filter((t) => t !== tech)
+                        );
                       }}
                     />
-
-                    <label
-                      className="form-check-label fs-5 text-light"
-                      htmlFor={tech}
-                    >
+                    <label className="form-check-label fs-5 text-light">
                       {tech}
                     </label>
                   </div>
                 ))}
               </div>
 
+              
               <div className="mb-4">
                 <p className="fw-semibold mb-3 fs-3 text-center text-primary">
                   Difficulty
@@ -129,21 +112,21 @@ const Projects = () => {
                     <input
                       className="form-check-input fs-5"
                       type="checkbox"
-                      name="level"
-                      id={level}
                       checked={difficulty === level}
-                      onChange={() => setDifficulty(level)}
+                      onChange={() =>
+                        setDifficulty(
+                          difficulty === level ? "" : level
+                        )
+                      }
                     />
-                    <label
-                      className="form-check-label fs-5 text-light"
-                      htmlFor={level}
-                    >
+                    <label className="form-check-label fs-5 text-light">
                       {level}
                     </label>
                   </div>
                 ))}
               </div>
 
+              
               <div className="mb-5">
                 <p className="fw-semibold mb-3 text-center text-primary fs-3">
                   Project Type
@@ -151,32 +134,25 @@ const Projects = () => {
 
                 {[
                   "Hackathon",
-                  "College",
                   "Learning",
                   "Startup",
                   "Open Source",
+                  "Portfolio",
                 ].map((type) => (
                   <div className="form-check mb-1" key={type}>
                     <input
                       className="form-check-input fs-5"
                       type="checkbox"
-                      id={type}
                       checked={projectTypes.includes(type)}
                       onChange={(e) => {
-                        if (e.target.checked) {
-                          setProjectTypes([...projectTypes, type]);
-                        } else {
-                          setProjectTypes(
-                            projectTypes.filter((t) => t !== type),
-                          );
-                        }
+                        setProjectTypes((prev) =>
+                          e.target.checked
+                            ? [...prev, type]
+                            : prev.filter((t) => t !== type)
+                        );
                       }}
                     />
-
-                    <label
-                      className="form-check-label text-light fs-5"
-                      htmlFor={type}
-                    >
+                    <label className="form-check-label fs-5 text-light">
                       {type}
                     </label>
                   </div>
@@ -198,6 +174,9 @@ const Projects = () => {
           </div>
         </div>
 
+        console.log("projects =", projects);
+
+        {/* ================= PROJECT LIST ================= */}
         <div className="col-md-9 col-lg-10 mt-2">
           <div className="card border-0 shadow-sm rounded-4 mb-4">
             <div className="card-body">
@@ -206,25 +185,40 @@ const Projects = () => {
                   <input
                     type="text"
                     className="form-control form-control-lg rounded-3"
-                    placeholder="Search projects by title or technology"
+                    placeholder="Search projects by title"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
                 <div className="col-md-4 text-end">
                   <span className="text-muted">
-                    Showing <strong>{filteredProjects.length}</strong> projects
+                    Showing{" "}
+                    <strong>{filteredProjects.length}</strong>{" "}
+                    projects
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="row">
-            {demoProjects.map((project) => (
-              <div className="col-md-6 col-lg-4 mb-4" key={project.id}>
-                <ProjectCard project={project} />
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <p className="text-center">Loading projects...</p>
+          ) : filteredProjects.length === 0 ? (
+            <p className="text-center text-muted">
+              No projects found
+            </p>
+          ) : (
+            <div className="row">
+              {filteredProjects.map((project) => (
+                <div
+                  className="col-md-6 col-lg-4 mb-4"
+                  key={project?._id}
+                >
+                  <ProjectCard project={project} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

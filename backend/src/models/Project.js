@@ -1,44 +1,54 @@
 import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema({
-  title: {
+  title: { type: String, required: true, trim: true },
+  description: { type: String, required: true },
+
+  techStack: [{
     type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  techStack: {
-    type: [String],
-    required: true,
-  },
-  level: {
+    enum: [
+      "React", "Node.js", "Express", "MongoDB",
+      "Javascript", "TypeScript", "Java", "Python",
+      "AI", "ML", "Next.js", "HTML", "CSS"
+    ],
+    required: true
+  }],
+
+  
+  difficulty: {
     type: String,
     enum: ["Beginner", "Intermediate", "Advanced"],
     required: true,
   },
-  type: {
+
+  roles: [{
     type: String,
-    enum: ["Learning", "Hackathon", "Product"],
-    required: true,
-  },
-  status: {
-    type: String,
-    default: "Active",
-  },
-  owner: {
+    required: true
+  }],
+
+  duration: String,
+  goal: String,
+
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  members: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+
+  membersJoined: { type: Number, default: 1 },
+
+  membersRequired: {
+    type: Number,
+    required: true,
+  },
+
+  status: {
+    type: String,
+    enum: ["Open", "Closed"],
+    default: "Open",
+  }
 }, { timestamps: true });
 
+const Project = mongoose.model("Project", projectSchema);
 
-export default mongoose.model("Project", projectSchema);
+export default Project;

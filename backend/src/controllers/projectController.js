@@ -2,9 +2,9 @@ import Project from "../models/Project.js";
 
 export const getProjects = async (req, res) => {
     try {
-        const projects = await Project.find({status: "Active"})
-        .populate("owner", "name")
-        .sort({ createdAt: -1 });
+         const projects = await Project.find();
+        // // .populate("owner", "name")
+        // .sort({ createdAt: -1 });
 
         const formatted = projects.map((p) => ({
             _id : p._id,
@@ -26,32 +26,73 @@ export const getProjects = async (req, res) => {
 };
 
 
+/** 
+ @desc    //Create new project
+  @route  // POST /api/projects
+  @access // Private
+  */
+ 
 export const createProject = async (req, res) => {
   try {
+    // 🔐 SAFETY CHECK
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        message: "Not authorized",
+      });
+    }
+
     const {
       title,
       description,
       techStack,
-      level,
-      type,
+      roles,
+      difficulty,
+      duration,
+      goal,
     } = req.body;
 
+    // ✅ VALIDATION
+    if (
+      !title?.trim() ||
+      !description?.trim() ||
+      !goal?.trim() ||
+      !difficulty ||
+      !Array.isArray(techStack) ||
+      techStack.length === 0 ||
+      !Array.isArray(roles) ||
+      roles.length === 0
+    ) {
+      return res.status(400).json({
+        message: "Please fill all required fields",
+      });
+    }
+
+    const membersRequired = roles.length;
+
     const project = await Project.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       techStack,
-      level,
-      type,
-      owner: req.user._id,
-      members: [req.user._id], // owner is first member
+      roles,
+      difficulty,
+      duration,
+      goal: goal.trim(),
+      membersRequired,
+      createdBy: req.user._id,
     });
 
-    res.status(201).json(project);
+    // ✅ CORRECT RESPONSE SHAPE
+    return res.status(201).json({
+      success: true,
+      project, // 🔥 singular
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create project" });
+    console.error("CREATE PROJECT ERROR 👉", error);
+    return res.status(500).json({
+      message: "Server error while creating project",
+    });
   }
 };
-
 
 export const getMyProjects = async (req, res) => {
   try {
