@@ -24,28 +24,26 @@ const Projects = () => {
 
   console.log("projects =", projects);
 
-  // 🔥 FILTER LOGIC (BACKEND SAFE)
-  const filteredProjects = projects
-  .filter((project) => project)  
+ const filteredProjects = projects
+  .filter((project) => project)
   .filter((project) => {
-    
     const matchTech =
-  selectedTech.length === 0 ||
-  selectedTech.some((tech) =>
-    project?.techStack?.includes(tech)
-  );
+      selectedTech.length === 0 ||
+      selectedTech.some((tech) =>
+        project?.techStack?.includes(tech)
+      );
 
     const matchDifficulty =
-      !difficulty || project.difficulty === difficulty;
+      !difficulty || project.level === difficulty;
 
     const matchType =
       projectTypes.length === 0 ||
-      projectTypes.includes(project.goal);
+      projectTypes.includes(project.type);
 
-   const matchSearch =
-  project?.title
-    ?.toLowerCase()
-    .includes(search.toLowerCase());
+    const matchSearch =
+      project?.title
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
 
     return (
       matchTech &&
@@ -174,9 +172,8 @@ const Projects = () => {
           </div>
         </div>
 
-        console.log("projects =", projects);
 
-        {/* ================= PROJECT LIST ================= */}
+       
         <div className="col-md-9 col-lg-10 mt-2">
           <div className="card border-0 shadow-sm rounded-4 mb-4">
             <div className="card-body">

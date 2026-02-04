@@ -16,6 +16,7 @@ export const createProject = createAsyncThunk(
         },
       });
 
+      // backend: { project: {...} }
       return res.data.project;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -31,7 +32,9 @@ export const getProjects = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get(API_URL);
-      return res.data.projects; // 👈 ARRAY
+
+      
+      return res.data.projects || res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Fetch projects failed"

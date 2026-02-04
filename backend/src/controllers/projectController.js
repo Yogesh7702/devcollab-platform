@@ -1,44 +1,39 @@
 import Project from "../models/Project.js";
 
+// ================= GET ALL PROJECTS =================
 export const getProjects = async (req, res) => {
-    try {
-         const projects = await Project.find();
-        // // .populate("owner", "name")
-        // .sort({ createdAt: -1 });
+  try {
+    const projects = await Project.find();
 
-        const formatted = projects.map((p) => ({
-            _id : p._id,
-            title: p.title,
-            description: p.description,
-            techStack: p.techStack,
-            level: p.level,
-            type: p.type,
-            status: p.status,
-            owner: p.owner,
-            membersCount: p.members.length,
-            createdAt: p.createdAt,
-        }));
+    const formatted = projects.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      description: p.description,
+      techStack: p.techStack,
+      level: p.level,
+      type: p.type,
+      status: p.status,
+      owner: p.owner,
+      membersCount: p.members?.length || 0,
+      createdAt: p.createdAt,
+    }));
 
-        res.json(formatted);
-    } catch (error) {
-        res.status(500).json({message: "Failed to fetch projects"});
-    }
+    res.json({
+      projects: formatted,
+    });
+  } catch (error) {
+    console.error("GET PROJECTS ERROR 👉", error);
+    res.status(500).json({
+      message: error.message || "Failed to fetch projects",
+    });
+  }
 };
 
 
-/** 
- @desc    //Create new project
-  @route  // POST /api/projects
-  @access // Private
-  */
- 
 export const createProject = async (req, res) => {
   try {
-    // 🔐 SAFETY CHECK
     if (!req.user || !req.user._id) {
-      return res.status(401).json({
-        message: "Not authorized",
-      });
+      return res.status(401).json({ message: "Not authorized" });
     }
 
     const {
@@ -51,7 +46,6 @@ export const createProject = async (req, res) => {
       goal,
     } = req.body;
 
-    // ✅ VALIDATION
     if (
       !title?.trim() ||
       !description?.trim() ||
@@ -81,27 +75,29 @@ export const createProject = async (req, res) => {
       createdBy: req.user._id,
     });
 
-    // ✅ CORRECT RESPONSE SHAPE
     return res.status(201).json({
       success: true,
-      project, // 🔥 singular
+      project,
     });
   } catch (error) {
     console.error("CREATE PROJECT ERROR 👉", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error while creating project",
     });
   }
 };
 
+
 export const getMyProjects = async (req, res) => {
   try {
     const projects = await Project.find({
       members: req.user._id,
-    }).sort({createdAt: -1});
+    }).sort({ createdAt: -1 });
 
     res.json(projects);
   } catch (error) {
-    res.status(500).json({message: "Failed to fetch your projects"});
+    res.status(500).json({
+      message: "Failed to fetch your projects",
+    });
   }
 };
