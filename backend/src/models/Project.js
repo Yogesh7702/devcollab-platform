@@ -7,10 +7,11 @@ const projectSchema = new mongoose.Schema({
   techStack: [{
     type: String,
     enum: [
-      "React", "Node.js", "Express", "MongoDB",
-      "Javascript", "TypeScript", "Java", "Python",
-      "AI", "ML", "Next.js", "HTML", "CSS"
-    ],
+  "React", "Node.js", "Express", "MongoDB",
+  "Javascript", "TypeScript", "Java", "Python",
+  "AI", "ML", "Next.js", "HTML", "CSS",
+  "Spring Boot"
+],
     required: true
   }],
 
@@ -35,8 +36,8 @@ const projectSchema = new mongoose.Schema({
     required: true,
   },
 
-  membersJoined: { type: Number, default: 1 },
-
+  membersJoined: { type: String },
+       
   membersRequired: {
     type: Number,
     required: true,
