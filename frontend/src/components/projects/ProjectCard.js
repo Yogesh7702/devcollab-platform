@@ -316,12 +316,16 @@ const ProjectCard = ({ project }) => {
   
   const navigate = useNavigate();
 
-  const membersJoined = project.membersCount ?? 0;
-  const membersRequired = project.membersRequired ?? 1;
-  const availableSlots = Math.max(
-    membersRequired - membersJoined, 0
-  );
-  const isClosed = availableSlots === 0;
+  const roles = Array.isArray(project.roles) ? project.roles : [];
+const joinedRoles = Array.isArray(project.joinedRoles)
+  ? project.joinedRoles
+  : [];
+
+const membersRequired = roles.length;
+const membersJoined = joinedRoles.length;
+
+const availableSlots = membersRequired - membersJoined;
+const isClosed = membersJoined >= membersRequired;
 
   return (
     <div
@@ -412,17 +416,17 @@ const ProjectCard = ({ project }) => {
               }`}
             >
               <small
-                className="text-light opacity-75 d-block"
-                style={{ fontSize: "10px" }}
+                className="text-dark d-block"
+                style={{ fontSize: "12px" }}
               >
                 SLOTS
               </small>
               <span
-                className={`small fw-bold ${
+                className={`small text-dark fw-bold ${
                   isClosed ? "text-danger" : "text-info"
                 }`}
               >
-                {availableSlots} / {membersRequired}
+                {membersJoined} / {membersRequired}
               </span>
             </div>
           </div>

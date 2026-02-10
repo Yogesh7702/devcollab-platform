@@ -83,27 +83,28 @@ export const getProjectById = createAsyncThunk(
 );
 
 
-export const joinProject = createAsyncThunk(
+ export const joinProject = createAsyncThunk(
   "projects/join",
-  async ({projectId, role}, thunkAPI) => {
+  async ({ projectId, role }, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
 
       const res = await axios.post(
         `http://localhost:5000/api/projects/${projectId}/join`,
-         {role},
-         {
+        { role },
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-         }
+        }
       );
 
-      return res.data.project;
+      
+      return res.data; 
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Join failed"
       );
     }
   }
-)
+);
