@@ -145,100 +145,151 @@ export const joinProject = async (req, res) => {
 
 
 export const requestToJoinProject = async (req, res) => {
-  const {role} = req.body;
-  const userId = req.user._id;
-  const projectId = req.params.id;
+  try {
+    const { role } = req.body;
+    const userId = req.user._id;
+    const projectId = req.params.id;
 
-  const project = await Project.findById(projectId);
+    const project = await Project.findById(projectId);
 
-  if(!project) {
-    return res.status(404).json({message: "Project not found"});
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // project full check
+    if (project.membersJoined.length >= project.roles.length) {
+      return res.status(400).json({ message: "Project is full" });
+    }
+
+    // invalid role
+    if (!project.roles.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    // role already filled
+    const roleTaken = project.membersJoined.some(
+      (member) => member.role === role
+    );
+
+    if (roleTaken) {
+      return res.status(400).json({ message: "Role already taken" });
+    }
+
+    // already requested
+    const alreadyRequested = await JoinRequest.findOne({
+      project: projectId,
+      user: userId,
+      status: "pending",
+    });
+
+    if (alreadyRequested) {
+      return res.status(400).json({ message: "Already requested" });
+    }
+
+    const request = await JoinRequest.create({
+      project: projectId,
+      user: userId,
+      role,
+    });
+
+    res.status(201).json({
+      message: "Join request sent",
+      request,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  if(project.membersJoined >= projec.membersRequired) {
-    return res.status(400).json({message: "Project is full"});
-  }
-
-  if(!project.roles.includes(role)) {
-    return res.status(400).json({message: "Invalide role"});
-  }
-
-  const alreadyRequested = await JoinRequest.findOne({
-    project: projectId,
-    user: userId
-  });
-
-  if(alreadyRequested) {
-    return res.status(400).json({message: "Already requested"});
-  }
-
-  const request = await JoinRequest.create({
-    project: projectId,
-    user: userId,
-    role
-  });
-
-  res.status(201).json({
-    message: "Join request",
-    request
-  });
 };
 
 
 
 export const getJoinRequests = async (req, res) => {
-  const project = await Project.findById(req.params.id);
+  try {
+    const project = await Project.findById(req.params.id);
 
-  if (!project) {
-    return res.status(404).json({ message: "Project not found" });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    const requests = await JoinRequest.find({
+      project: req.params.id,
+      status: "pending",
+    }).populate("user", "name email");
+
+    res.json(requests);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  
-  if (project.createdBy.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  const requests = await JoinRequest.find({
-    project: req.params.id,
-    status: "pending"
-  }).populate("user", "name email");
-
-  res.json(requests);
 };
 
 
 
+
+
 export const handleJoinRequest = async (req, res) => {
-  const { action } = req.body; 
+  try {
+    const { action } = req.body;
 
-  const request = await JoinRequest.findById(req.params.requestId)
-    .populate("project");
+    const request = await JoinRequest.findById(req.params.requestId)
+      .populate("project");
 
-  if (!request) {
-    return res.status(404).json({ message: "Request not found" });
-  }
-
-  const project = request.project;
-
- 
-  if (project.createdBy.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  if (action === "approve") {
-    request.status = "approved";
-    project.membersJoined += 1;
-
-    if (project.membersJoined >= project.membersRequired) {
-      project.status = "Closed";
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
     }
 
-    await project.save();
-  } else {
-    request.status = "rejected";
+    const project = request.project;
+
+    if (project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({ message: "Request already handled" });
+    }
+
+    if (action === "approve") {
+
+      // role already filled safety check
+      const roleTaken = project.membersJoined.some(
+        (member) => member.role === request.role
+      );
+
+      if (roleTaken) {
+        return res.status(400).json({ message: "Role already taken" });
+      }
+
+      request.status = "approved";
+
+      project.membersJoined.push({
+        user: request.user,
+        role: request.role,
+      });
+
+      if (project.membersJoined.length >= project.roles.length) {
+        project.status = "Closed";
+      }
+
+      await project.save();
+
+    } else if (action === "reject") {
+
+      request.status = "rejected";
+
+    } else {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    await request.save();
+
+    res.json({ message: `Request ${action}ed successfully` });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  await request.save();
-
-  res.json({ message: `Request ${action}ed` });
 };

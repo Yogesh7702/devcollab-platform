@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createProject, getProjectById, getProjects } from "./projectAction";
+import { createProject, getProjectById, getProjects, requestToJoinProject} from "./projectAction";
 import { logout } from "../auth/authSlice"; // Import logout from auth
 
 const initialState = {
@@ -8,6 +8,9 @@ const initialState = {
   singleProject: null,
   isLoading: false,
   error: null,
+  requestLoading: false,
+  requestSuccess: false,
+  requestError: null,
 };
 
 const projectSlice = createSlice({
@@ -69,6 +72,21 @@ const projectSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         console.log("❌ PROJECT ERROR:", action.payload);
+      })
+
+
+      .addCase(requestToJoinProject.pending, (state) => {
+        state.requestLoading = true;
+        state.requestSuccess = false;
+        state.requestError = null;
+      })
+      .addCase(requestToJoinProject.fulfilled, (state) => {
+        state.requestLoading = false;
+        state.requestSuccess = true;
+      })
+      .addCase(requestToJoinProject.rejected, (state, action) => {
+        state.requestLoading = false;
+        state.requestError = action.payload;
       });
   },
 });

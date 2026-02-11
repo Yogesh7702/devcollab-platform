@@ -1,48 +1,102 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";
-import { getProjectById } from "../redux/projects/projectAction";
+import { getProjectById, requestToJoinProject } from "../redux/projects/projectAction";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import toast from "react-hot-toast";
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const { project: projectWrapper, singleProject, isLoading, error } = useSelector(
-    (state) => state.projects
-  );
+  const [selectedRole, setSelectedRole] = useState("");
+
+  const {
+    project: projectWrapper,
+    singleProject,
+    isLoading,
+    error,
+    requestLoading,
+    requestSuccess,
+    requestError,
+  } = useSelector((state) => state.projects);
+
   const project = projectWrapper?.project || singleProject || projectWrapper;
 
   useEffect(() => {
     if (id) dispatch(getProjectById(id));
   }, [dispatch, id]);
 
-  if (isLoading) return (
-    <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
-      <Navbar />
-      <div className="container py-5 text-center">
-        <div className="spinner-border text-info" style={{width: '3rem', height: '3rem'}}></div>
-        <p className="mt-3 text-light fw-semibold">Loading project...</p>
-      </div>
-      <Footer />
-    </div>
-  );
+  // Toast handling
+  useEffect(() => {
+    if (requestSuccess) {
+      toast.success("Join request sent successfully");
+    }
 
-  if (error || !project) return (
-    <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
-      <Navbar />
-      <div className="container py-5 text-center">
-        <div className="mb-4" style={{fontSize: "80px"}}>❌</div>
-        <h2 className="fw-bold mb-3">Project Not Found</h2>
-        <p className="text-light mb-4">This project doesn't exist or has been removed</p>
-        <Link to="/projects" className="btn btn-info text-dark btn-lg px-5 py-3 fw-bold shadow" style={{borderRadius: "12px"}}>
-          ← Back to Projects
-        </Link>
+    if (requestError) {
+      toast.error(requestError);
+    }
+  }, [requestSuccess, requestError]);
+
+  const handleJoin = () => {
+    if (!selectedRole) {
+      toast.error("Please select a role");
+      return;
+    }
+
+    dispatch(
+      requestToJoinProject({
+        projectId: id,
+        role: selectedRole,
+      })
+    );
+  };
+
+  if (isLoading)
+    return (
+      <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
+        <Navbar />
+        <div className="container py-5 text-center">
+          <div className="spinner-border text-info" style={{ width: "3rem", height: "3rem" }}></div>
+          <p className="mt-3 text-light fw-semibold">Loading project...</p>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
-  );
+    );
+
+  if (error || !project)
+    return (
+      <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
+        <Navbar />
+        <div className="container py-5 text-center">
+          <div className="mb-4" style={{ fontSize: "80px" }}>❌</div>
+          <h2 className="fw-bold mb-3">Project Not Found</h2>
+          <p className="text-light mb-4">
+            This project doesn't exist or has been removed
+          </p>
+          <Link
+            to="/projects"
+            className="btn btn-info text-dark btn-lg px-5 py-3 fw-bold shadow"
+            style={{ borderRadius: "12px" }}
+          >
+            ← Back to Projects
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+
+   const filledSeats = Array.isArray(project?.membersJoined)
+  ? project.membersJoined.length
+  : 0;
+
+const totalSeats = Array.isArray(project?.roles)
+  ? project.roles.length
+  : 0;
+
+const isFull = totalSeats > 0 && filledSeats >= totalSeats;
+
 
   return (
     <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
@@ -97,10 +151,8 @@ const ProjectDetails = () => {
                 )}
               </div>
 
-
               <h1 className="display-5 fw-bold mb-3">{project.title}</h1>
 
-             
               <div className="row g-3">
                 <div className="col-auto">
                   <div 
@@ -135,13 +187,13 @@ const ProjectDetails = () => {
                     }}
                   >
                     <small className="text-light d-block mb-1" style={{ fontSize: "11px" }}>Joined</small>
-                    <span className="fw-bold text-info">{project.membersJoined || 0}</span>
+                    <span className="fw-bold text-info">{project.membersJoined?.length || 0}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            
+            {/* JOIN CARD */}
             <div className="col-lg-4">
               <div 
                 className="card border-0 p-4 shadow-lg"
@@ -153,7 +205,7 @@ const ProjectDetails = () => {
               >
                 <div className="text-center mb-3">
                   <div className="h2 fw-bold text-info mb-1">
-                    {(project.membersRequired || 0) - (project.membersJoined || 0)}/{project.membersRequired || 0}
+                    {(project.membersRequired || 0) - (project.membersJoined?.length || 0)}/{project.membersRequired || 0}
                   </div>
                   <small className="text-light">Spots Available</small>
                 </div>
@@ -162,7 +214,7 @@ const ProjectDetails = () => {
                   <div 
                     className="progress-bar bg-info" 
                     style={{
-                      width: `${((project.membersJoined || 0) / (project.membersRequired || 1)) * 100}%`,
+                      width: `${((project.membersJoined?.length || 0) / (project.membersRequired || 1)) * 100}%`,
                       borderRadius: "10px"
                     }}
                   />
@@ -170,23 +222,25 @@ const ProjectDetails = () => {
 
                 <button 
                   onClick={handleJoin}
+                  disabled={isFull || requestLoading}
                   className="btn btn-info text-dark w-100 py-3 fw-bold shadow mb-2"
                   style={{borderRadius: "12px"}}
                 >
-                  🚀 Join This Project
+                  {isFull ? "🔒 Project Full" : requestLoading ? "Sending..." : "🚀 Join This Project"}
                 </button>
-                <small className="text-center d-block text-light opacity-75">Quick application</small>
+                <small className="text-center d-block text-light opacity-75">
+                  {isFull ? "All positions filled" : "Quick application"}
+                </small>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      
       <div className="container py-5">
         <div className="row g-4">
           
-          
+          {/* LEFT CONTENT */}
           <div className="col-lg-8">
             
             {/* DESCRIPTION */}
@@ -253,7 +307,7 @@ const ProjectDetails = () => {
               </div>
             </div>
 
-            {/* ROLES */}
+            {/* ROLES - Updated with radio selection logic */}
             {project.roles && (
               <div 
                 className="card border-0 p-4 mb-4 shadow"
@@ -264,35 +318,60 @@ const ProjectDetails = () => {
                 }}
               >
                 <h4 className="fw-bold text-info mb-4">
-                  👥 Open Roles ({Array.isArray(project.roles) ? project.roles.length : 1});
+                  👥 Available Roles ({Array.isArray(project.roles) ? project.roles.length : 1})
                 </h4>
                 <div className="row g-3">
-                  {Array.isArray(project.roles) ? project.roles.map((role, i) => (
-                    <div key={i} className="col-md-6">
-                      <div 
-                        className="p-3 rounded-3 h-100"
-                        style={{
-                          backgroundColor: "rgba(23, 162, 184, 0.08)",
-                          border: "1px solid rgba(23, 162, 184, 0.2)"
-                        }}
-                      >
-                        <div className="d-flex justify-content-between align-items-center">
-                          <h6 className="fw-bold text-white mb-0">{role}</h6>
-                          <span 
-                            className="badge px-3 py-1"
-                            style={{
-                              backgroundColor: "#28a74520",
-                              color: "#28a745",
-                              borderRadius: "6px",
-                              fontSize: "11px"
-                            }}
-                          >
-                            Open
-                          </span>
+                  {Array.isArray(project.roles) ? project.roles.map((role, i) => {
+                    const roleTaken = project.membersJoined?.some(
+                      (member) => member.role === role
+                    );
+
+                    return (
+                      <div key={i} className="col-md-6">
+                        <div 
+                          className={`p-3 rounded-3 h-100 ${!roleTaken && !isFull ? 'cursor-pointer' : ''}`}
+                          style={{
+                            backgroundColor: roleTaken || isFull ? "rgba(108, 117, 125, 0.1)" : "rgba(23, 162, 184, 0.08)",
+                            border: `1px solid ${roleTaken || isFull ? "rgba(108, 117, 125, 0.2)" : "rgba(23, 162, 184, 0.2)"}`,
+                            cursor: roleTaken || isFull ? "not-allowed" : "pointer",
+                            opacity: roleTaken || isFull ? 0.6 : 1
+                          }}
+                          onClick={() => {
+                            if (!roleTaken && !isFull) {
+                              setSelectedRole(role);
+                            }
+                          }}
+                        >
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="role"
+                              value={role}
+                              checked={selectedRole === role}
+                              disabled={roleTaken || isFull}
+                              onChange={(e) => setSelectedRole(e.target.value)}
+                              style={{cursor: roleTaken || isFull ? "not-allowed" : "pointer"}}
+                            />
+                            <label className="form-check-label d-flex justify-content-between align-items-center w-100">
+                              <h6 className="fw-bold text-white mb-0">{role}</h6>
+                              <span 
+                                className="badge px-3 py-1"
+                                style={{
+                                  backgroundColor: roleTaken ? "#6c757d20" : "#28a74520",
+                                  color: roleTaken ? "#6c757d" : "#28a745",
+                                  borderRadius: "6px",
+                                  fontSize: "11px"
+                                }}
+                              >
+                                {roleTaken ? "Filled" : "Open"}
+                              </span>
+                            </label>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )) : (
+                    );
+                  }) : (
                     <div className="col-12">
                       <div 
                         className="p-4 rounded-3 text-center"
@@ -387,8 +466,8 @@ const ProjectDetails = () => {
                 <span 
                   className="badge px-2 py-1"
                   style={{
-                    backgroundColor: project.status === "Open" ? "#28a74520" : "#6c757d20",
-                    color: project.status === "Open" ? "#28a745" : "#6c757d",
+                    backgroundColor: project.status === "open" ? "#28a74520" : "#6c757d20",
+                    color: project.status === "open" ? "#28a745" : "#6c757d",
                     fontSize: "11px",
                     borderRadius: "6px"
                   }}
@@ -407,7 +486,7 @@ const ProjectDetails = () => {
               <div className="d-flex justify-content-between py-2 mb-2" style={{borderBottom: "1px solid rgba(23, 162, 184, 0.1)"}}>
                 <small className="text-light">Members</small>
                 <small className="fw-bold text-info">
-                  {project.membersJoined || 0}/{project.membersRequired || 0}
+                  {project.membersJoined?.length || 0}/{project.membersRequired || 0}
                 </small>
               </div>
 
