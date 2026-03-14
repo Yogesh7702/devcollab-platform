@@ -1,0 +1,29 @@
+.tech-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.tech-box input {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+}
+
+.tech-chip {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.tech-chip span {
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
