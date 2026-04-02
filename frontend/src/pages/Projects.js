@@ -9,6 +9,7 @@ import { getProjects } from "../redux/projects/projectAction";
 const Projects = () => {
   const dispatch = useDispatch();
   const { projects = [], isLoading } = useSelector((state) => state.projects);
+  
 
   const [selectedTech, setSelectedTech] = useState([]);
   const [difficulty, setDifficulty] = useState("");
@@ -17,7 +18,11 @@ const Projects = () => {
 
   useEffect(() => {
     dispatch(getProjects());
+
   }, [dispatch]);
+
+  const fullState = useSelector((state) => state);
+console.log("FULL STATE 👉", fullState);
 
   const filteredProjects = projects.filter((project) => {
 
@@ -43,16 +48,14 @@ const Projects = () => {
     !search ||
     project?.title?.toLowerCase().includes(search.toLowerCase());
 
-   console.log({
-  title: project.title,
-  matchTech,
-  matchDifficulty,
-  matchType,
-  matchSearch
-});
+ 
 
   return matchTech && matchDifficulty && matchType && matchSearch;
 });
+
+  console.log(projects.title);
+  
+
   const clearAllFilters = () => {
     setSelectedTech([]);
     setDifficulty("");
@@ -140,8 +143,9 @@ const Projects = () => {
           </div>
 
           {/* ===== MAIN CONTENT ===== */}
+
           <div className="col-lg-9">
-            {/* SEARCH BAR (MODERN) */}
+            
             <div className="mb-4">
               <div className="input-group input-group-lg shadow-sm">
                 <span className="input-group-text bg-dark bg-opacity-50 border-info border-opacity-25 text-info px-4">🔍</span>

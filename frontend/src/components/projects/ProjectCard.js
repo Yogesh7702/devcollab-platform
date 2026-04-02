@@ -1,23 +1,35 @@
 
 
+
+
+
+
+
 import React from "react";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import "../../styles/ProjectCard.css";
 
 const ProjectCard = ({ project }) => {
-  
   const navigate = useNavigate();
 
+  console.log("PROJECT DATA:", project);
+
   const roles = Array.isArray(project.roles) ? project.roles : [];
-const joinedRoles = Array.isArray(project.joinedRoles)
-  ? project.joinedRoles
-  : [];
 
-const membersRequired = roles.length;
-const membersJoined = joinedRoles.length;
+  // ✅ frontend se hi membersRequired
+  const membersRequiredFromFrontend = roles.reduce((acc, r) => {
+    if (typeof r === "string") return acc + 1;
+    if (r && typeof r === "object" && r.count != null) return acc + r.count;
+    return acc;
+  }, 0);
 
-const availableSlots = membersRequired - membersJoined;
-const isClosed = membersJoined >= membersRequired;
+  const membersJoined = Array.isArray(project.membersJoined)
+    ? project.membersJoined.length
+    : 0;
+
+  const availableSlots = membersRequiredFromFrontend - membersJoined;
+  const isClosed =
+    membersJoined >= membersRequiredFromFrontend && membersRequiredFromFrontend > 0;
 
   return (
     <div
@@ -91,10 +103,13 @@ const isClosed = membersJoined >= membersRequired;
               >
                 REQUIRED ROLE
               </small>
+
               <span className="text-white small fw-medium text-truncate d-block">
-                {Array.isArray(project.roles)
-                  ? project.roles[0] || "Any"
-                  : project.roles || "Any"}
+                {roles.length > 0
+                  ? typeof roles[0] === "string"
+                    ? roles[0]
+                    : roles[0]?.role || "Any"
+                  : "Any"}
               </span>
             </div>
           </div>
@@ -113,12 +128,13 @@ const isClosed = membersJoined >= membersRequired;
               >
                 SLOTS
               </small>
+
               <span
                 className={`small text-dark fw-bold ${
                   isClosed ? "text-danger" : "text-info"
                 }`}
               >
-                {membersJoined} / {membersRequired}
+                {membersJoined} / {membersRequiredFromFrontend}
               </span>
             </div>
           </div>
@@ -145,7 +161,7 @@ const isClosed = membersJoined >= membersRequired;
           </div>
         )}
 
-        
+        {/* BUTTON */}
         <div className="mt-auto">
           <button
             className={`btn w-100 py-2 fw-bold rounded-3 transition-all ${
@@ -154,7 +170,10 @@ const isClosed = membersJoined >= membersRequired;
                 : "btn-info text-dark shadow-sm"
             }`}
             disabled={isClosed}
-            onClick={() => navigate(`/projects/${project._id}`)}
+            onClick={() => {
+              console.log("NAVIGATING TO:", `/projects/${project._id}`);
+              navigate(`/projects/${project._id}`);
+            }}
           >
             {isClosed ? "Project Full" : "Join Project Team"}
           </button>

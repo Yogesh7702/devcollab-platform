@@ -19,6 +19,8 @@ export const getProjects = createAsyncThunk(
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log(thunkAPI.getState().auth);
+
       return res.data.projects;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -81,7 +83,7 @@ export const requestToJoinProject = createAsyncThunk(
       const token = thunkAPI.getState().auth.user?.token;
 
       const res = await axios.post(
-        `${API_URL}/${projectId}/request`,
+        `${API_URL}/${projectId}/join`,
         { role },
         {
           headers: { Authorization: `Bearer ${token}` },
