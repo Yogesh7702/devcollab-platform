@@ -15,7 +15,12 @@ const CreateProject = () => {
     "Node.js",
     "Express",
     "MongoDB",
-    "PostgreSQL",
+    "Javascript",
+    "TypeScript",
+    "AI",
+    "ML",
+    "HTML",
+    "CSS",
     "Next.js",
     "Java",
     "Spring Boot",
@@ -24,8 +29,8 @@ const CreateProject = () => {
   const ROLE_OPTIONS = [
     "Frontend",
     "Backend",
-    "Fullstack",
-    "Designer",
+    "Full-stack",
+    "UI/UX Designer",
     "DevOps",
   ];
   const GOAL_OPTIONS = [
@@ -74,30 +79,36 @@ const CreateProject = () => {
     }));
   };
 
-  const handleRoleAdd = (role) => {
-    if (role && !formData.roles.includes(role)) {
-      setFormData((prev) => ({
-        ...prev,
-        roles: [...prev.roles, role],
-      }));
-    }
-  };
+  const handleRoleAdd = (value) => {
+  if (!value) return;
+  const newRole = { role: value, count: 0, _id: Date.now().toString() }; 
+  setFormData({
+    ...formData,
+    roles: [...formData.roles, newRole]
+  });
+};
 
   const removeRole = (role) => {
-    setFormData((prev) => ({
-      ...prev,
-      roles: prev.roles.filter((r) => r !== role),
-    }));
-  };
+  setFormData({
+    ...formData,
+    roles: formData.roles.filter((r) => r._id !== role._id) 
+  });
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const roles = formData.roles.map((role) => ({
+      role,
+      count: 1,
+    }));
+
     const finalData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
       techStack: formData.techStack,
       difficulty: formData.difficulty,
-      roles: formData.roles,
+      roles,
       duration: formData.duration,
       goal: formData.goal,
       membersRequired: formData.roles.length,
@@ -285,10 +296,10 @@ const CreateProject = () => {
                         <div className="d-flex flex-wrap gap-2 mb-3">
                           {formData.roles.map((role) => (
                             <span
-                              key={role}
+                              key={role._id || role.role}
                               className="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 px-3 py-2 d-flex align-items-center"
                             >
-                              {role}
+                              {role.role}
 
                               <button
                                 type="button"
@@ -316,11 +327,8 @@ const CreateProject = () => {
 
                       </div>
 
-
-
-
-
                     </div>
+
                     <div className="col-md-6">
                       <label
                         className="text-info small fw-bold mb-2 d-block text-uppercase tracking-wider"
