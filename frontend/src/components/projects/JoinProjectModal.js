@@ -1,54 +1,11 @@
 import React, { useState } from "react";
 
-export function JoinProjectModal({ show, onClose, project }) {
+ export function JoinProjectModal({ show, onClose, project }) {
+  
+
   const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
   const [resume, setResume] = useState(null);
-
-  const handleSendRequest = async () => {
-    console.log("clicked");
-
-    try {
-      if (!role) {
-        alert("Please select role");
-        return;
-      }
-
-      if (!message) {
-        alert("Please enter message");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("role", role);
-      formData.append("message", message);
-      if (resume) {
-        formData.append("resume", resume);
-      }
-
-      const res = await fetch(
-        `http://localhost:8080/api/requests/${project._id}/join`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: formData,
-        },
-      );
-
-      const data = await res.json();
-      console.log(data);
-
-      alert("Request sent successfully!");
-      onClose();
-    } catch (error) {
-      console.log(error);
-      console.log(error.message);
-
-      alert("Failed to send request.", error.message);
-    }
-  };
 
   if (!show) return null;
 
@@ -60,7 +17,7 @@ export function JoinProjectModal({ show, onClose, project }) {
 
           <button
             className="btn-close btn-close-white ms-auto"
-            style={{ paddingRight: "30px" }}
+            style={{paddingRight: "30px"}}
             onClick={onClose}
           ></button>
         </div>
@@ -75,8 +32,8 @@ export function JoinProjectModal({ show, onClose, project }) {
           >
             <option value="">Choose Role</option>
             {project?.roles?.map((role, index) => (
-              <option key={role._id} value={role._id || role.role}>
-                {role.role} - ({role.count})
+              <option key={index} value={role}>
+                {role}
               </option>
             ))}
           </select>
@@ -92,7 +49,7 @@ export function JoinProjectModal({ show, onClose, project }) {
               placeholder="Explain your experience and why you want to join this project..."
               value={message}
               onChange={(e) => setMessage(e.target?.value)}
-            ></textarea>
+           ></textarea>
           </div>
 
           <div className="mb-3">
@@ -112,9 +69,7 @@ export function JoinProjectModal({ show, onClose, project }) {
             Cancel
           </button>
 
-          <button className="btn btn-info" onClick={handleSendRequest}>
-            Send Request
-          </button>
+          <button className="btn btn-info">Send Request</button>
         </div>
       </div>
     </div>

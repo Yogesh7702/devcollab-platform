@@ -19,8 +19,6 @@ export const registerUser = createAsyncThunk(
       return user;
     } catch (error) {
       console.log("REGISTER ERROR 👉", error);
-      console.log("SERVER RESPONSE DATA:", error.response?.data);
-  console.error("LOGIN ERROR 👉", error)
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Signup failed"
       );
@@ -43,15 +41,11 @@ export const loginUser = createAsyncThunk(
       };
       localStorage.setItem("user", JSON.stringify(user));
       return user;
-
-      console.log(res.data);
-    } catch (err) {
-      console.log("SERVER RESPONSE DATA:", err.response?.data);
-  console.error("LOGIN ERROR 👉", err)
-      
-  return thunkAPI.rejectWithValue(
-    err.response?.data?.message || "Login failed"
-  );
+    } catch (error) {
+      console.log("LOGIN ERROR 👉", error);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Login failed"
+      );
     }
   }
 );

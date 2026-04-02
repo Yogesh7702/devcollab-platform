@@ -1,10 +1,12 @@
+
+
+
+
+
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";
-import {
-  getProjectById,
-  requestToJoinProject,
-} from "../redux/projects/projectAction";
+import { getProjectById, requestToJoinProject } from "../redux/projects/projectAction";
 import { clearSingleProject } from "../redux/projects/projectSlice";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -14,8 +16,6 @@ import toast from "react-hot-toast";
 const ProjectDetails = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-
-  console.log("Project-Details: ", id);
 
   const [selectedRole, setSelectedRole] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -29,13 +29,14 @@ const ProjectDetails = () => {
     requestError,
   } = useSelector((state) => state.projects);
 
+  
   const project = singleProject;
+  console.log("PROJECT DATA:", JSON.stringify(project, null, 2))
 
   useEffect(() => {
     if (id) dispatch(getProjectById(id));
 
-    console.log("project error", project);
-
+   
     return () => {
       dispatch(clearSingleProject());
     };
@@ -61,22 +62,16 @@ const ProjectDetails = () => {
       requestToJoinProject({
         projectId: id,
         role: selectedRole,
-      }),
+      })
     );
   };
 
   if (isLoading)
     return (
-      <div
-        className="text-white min-vh-100"
-        style={{ backgroundColor: "#101113" }}
-      >
+      <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
         <Navbar />
         <div className="container py-5 text-center">
-          <div
-            className="spinner-border text-info"
-            style={{ width: "3rem", height: "3rem" }}
-          ></div>
+          <div className="spinner-border text-info" style={{ width: "3rem", height: "3rem" }}></div>
           <p className="mt-3 text-light fw-semibold">Loading project...</p>
         </div>
         <Footer />
@@ -85,15 +80,10 @@ const ProjectDetails = () => {
 
   if (error || !project)
     return (
-      <div
-        className="text-white min-vh-100"
-        style={{ backgroundColor: "#101113" }}
-      >
+      <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
         <Navbar />
         <div className="container py-5 text-center">
-          <div className="mb-4" style={{ fontSize: "80px" }}>
-            ❌
-          </div>
+          <div className="mb-4" style={{ fontSize: "80px" }}>❌</div>
           <h2 className="fw-bold mb-3">Project Not Found</h2>
           <p className="text-light mb-4">
             This project doesn't exist or has been removed
@@ -114,15 +104,14 @@ const ProjectDetails = () => {
     ? project.membersJoined.length
     : 0;
 
-  const totalSeats = project?.membersRequired || 0;
+  const totalSeats = Array.isArray(project?.roles)
+    ? project.roles.length
+    : 0;
 
   const isFull = totalSeats > 0 && filledSeats >= totalSeats;
 
   return (
-    <div
-      className="text-white min-vh-100"
-      style={{ backgroundColor: "#101113" }}
-    >
+    <div className="text-white min-vh-100" style={{ backgroundColor: "#101113" }}>
       <Navbar />
 
       {/* HERO HEADER */}
@@ -130,7 +119,7 @@ const ProjectDetails = () => {
         className="py-4"
         style={{
           background: "linear-gradient(180deg, #101113 0%, #1a1d21 100%)",
-          borderBottom: "1px solid rgba(23, 162, 184, 0.1)",
+          borderBottom: "1px solid rgba(23, 162, 184, 0.1)"
         }}
       >
         <div className="container">
@@ -144,15 +133,15 @@ const ProjectDetails = () => {
 
           <div className="row align-items-start g-4">
             <div className="col-lg-8">
+
               <div className="mb-3">
                 <span
                   className="badge px-4 py-2 me-2"
                   style={{
-                    backgroundColor:
-                      project.status === "open" ? "#28a745" : "#6c757d",
+                    backgroundColor: project.status === "open" ? "#28a745" : "#6c757d",
                     borderRadius: "8px",
                     fontSize: "12px",
-                    fontWeight: "600",
+                    fontWeight: "600"
                   }}
                 >
                   {project.status === "open" ? "🟢 Open" : "⚪ Closed"}
@@ -166,7 +155,7 @@ const ProjectDetails = () => {
                       borderRadius: "8px",
                       fontSize: "12px",
                       fontWeight: "600",
-                      border: "1px solid rgba(23, 162, 184, 0.3)",
+                      border: "1px solid rgba(23, 162, 184, 0.3)"
                     }}
                   >
                     📊 {project.difficulty}
@@ -182,18 +171,11 @@ const ProjectDetails = () => {
                     className="px-4 py-2 rounded-3"
                     style={{
                       backgroundColor: "rgba(23, 162, 184, 0.1)",
-                      border: "1px solid rgba(23, 162, 184, 0.2)",
+                      border: "1px solid rgba(23, 162, 184, 0.2)"
                     }}
                   >
-                    <small
-                      className="text-light d-block mb-1"
-                      style={{ fontSize: "11px" }}
-                    >
-                      Duration
-                    </small>
-                    <span className="fw-bold text-info">
-                      {project.duration || "Flexible"}
-                    </span>
+                    <small className="text-light d-block mb-1" style={{ fontSize: "11px" }}>Duration</small>
+                    <span className="fw-bold text-info">{project.duration || "Flexible"}</span>
                   </div>
                 </div>
                 <div className="col-auto">
@@ -201,18 +183,11 @@ const ProjectDetails = () => {
                     className="px-4 py-2 rounded-3"
                     style={{
                       backgroundColor: "rgba(23, 162, 184, 0.1)",
-                      border: "1px solid rgba(23, 162, 184, 0.2)",
+                      border: "1px solid rgba(23, 162, 184, 0.2)"
                     }}
                   >
-                    <small
-                      className="text-light d-block mb-1"
-                      style={{ fontSize: "11px" }}
-                    >
-                      Team Size
-                    </small>
-                    <span className="fw-bold text-info">
-                      {project.membersRequired || 0}
-                    </span>
+                    <small className="text-light d-block mb-1" style={{ fontSize: "11px" }}>Team Size</small>
+                    <span className="fw-bold text-info">{project.membersRequired || 0}</span>
                   </div>
                 </div>
                 <div className="col-auto">
@@ -220,18 +195,11 @@ const ProjectDetails = () => {
                     className="px-4 py-2 rounded-3"
                     style={{
                       backgroundColor: "rgba(23, 162, 184, 0.1)",
-                      border: "1px solid rgba(23, 162, 184, 0.2)",
+                      border: "1px solid rgba(23, 162, 184, 0.2)"
                     }}
                   >
-                    <small
-                      className="text-light d-block mb-1"
-                      style={{ fontSize: "11px" }}
-                    >
-                      Joined
-                    </small>
-                    <span className="fw-bold text-info">
-                      {project.membersJoined?.length || 0}
-                    </span>
+                    <small className="text-light d-block mb-1" style={{ fontSize: "11px" }}>Joined</small>
+                    <span className="fw-bold text-info">{project.membersJoined?.length || 0}</span>
                   </div>
                 </div>
               </div>
@@ -244,30 +212,22 @@ const ProjectDetails = () => {
                 style={{
                   backgroundColor: "rgba(26, 29, 33, 0.8)",
                   borderRadius: "16px",
-                  border: "1px solid rgba(23, 162, 184, 0.2)",
+                  border: "1px solid rgba(23, 162, 184, 0.2)"
                 }}
               >
                 <div className="text-center mb-3">
                   <div className="h2 fw-bold text-info mb-1">
-                    {project.membersJoined?.length || 0}/
-                    {project.membersRequired || 0}
+                    {project.membersJoined?.length || 0}/{project.membersRequired || 0}
                   </div>
                   <small className="text-light">Members Joined</small>
                 </div>
 
-                <div
-                  className="progress mb-3"
-                  style={{
-                    height: "10px",
-                    borderRadius: "10px",
-                    backgroundColor: "rgba(23, 162, 184, 0.1)",
-                  }}
-                >
+                <div className="progress mb-3" style={{ height: '10px', borderRadius: "10px", backgroundColor: "rgba(23, 162, 184, 0.1)" }}>
                   <div
                     className="progress-bar bg-info"
                     style={{
                       width: `${((project.membersJoined?.length || 0) / (project.membersRequired || 1)) * 100}%`,
-                      borderRadius: "10px",
+                      borderRadius: "10px"
                     }}
                   />
                 </div>
@@ -278,11 +238,7 @@ const ProjectDetails = () => {
                   className="btn btn-info text-dark w-100 py-3 fw-bold shadow mb-2"
                   style={{ borderRadius: "12px" }}
                 >
-                  {isFull
-                    ? "🔒 Project Full"
-                    : requestLoading
-                      ? "Sending..."
-                      : "🚀 Join This Project"}
+                  {isFull ? "🔒 Project Full" : requestLoading ? "Sending..." : "🚀 Join This Project"}
                 </button>
                 <small className="text-center d-block text-light opacity-75">
                   {isFull ? "All positions filled" : "Quick application"}
@@ -295,25 +251,23 @@ const ProjectDetails = () => {
 
       <div className="container py-5">
         <div className="row g-4">
+
           {/* LEFT CONTENT */}
           <div className="col-lg-8">
+
             {/* DESCRIPTION */}
             <div
               className="card border-0 p-4 mb-4 shadow"
               style={{
                 backgroundColor: "rgba(26, 29, 33, 0.6)",
                 borderRadius: "16px",
-                border: "1px solid rgba(23, 162, 184, 0.15)",
+                border: "1px solid rgba(23, 162, 184, 0.15)"
               }}
             >
               <h4 className="fw-bold text-info mb-3">📋 Project Overview</h4>
               <p
                 className="text-light mb-0"
-                style={{
-                  lineHeight: "1.8",
-                  fontSize: "19px",
-                  color: "#a8b3c0",
-                }}
+                style={{ lineHeight: "1.8", fontSize: "19px", color: "#a8b3c0" }}
               >
                 {project.description}
               </p>
@@ -325,36 +279,34 @@ const ProjectDetails = () => {
               style={{
                 backgroundColor: "rgba(26, 29, 33, 0.6)",
                 borderRadius: "16px",
-                border: "1px solid rgba(23, 162, 184, 0.15)",
+                border: "1px solid rgba(23, 162, 184, 0.15)"
               }}
             >
               <h4 className="fw-bold text-info mb-4">⚙️ Tech Stack</h4>
               <div className="d-flex flex-wrap gap-2">
-                {Array.isArray(project.techStack) ? (
-                  project.techStack.map((tech, i) => (
-                    <span
-                      key={i}
-                      className="badge px-4 py-2"
-                      style={{
-                        backgroundColor: "rgba(23, 162, 184, 0.15)",
-                        color: "#17a2b8",
-                        borderRadius: "8px",
-                        fontSize: "17px",
-                        fontWeight: "600",
-                        border: "1px solid rgba(23, 162, 184, 0.2)",
-                      }}
-                    >
-                      {tech}
-                    </span>
-                  ))
-                ) : (
+                {Array.isArray(project.techStack) ? project.techStack.map((tech, i) => (
+                  <span
+                    key={i}
+                    className="badge px-4 py-2"
+                    style={{
+                      backgroundColor: "rgba(23, 162, 184, 0.15)",
+                      color: "#17a2b8",
+                      borderRadius: "8px",
+                      fontSize: "17px",
+                      fontWeight: "600",
+                      border: "1px solid rgba(23, 162, 184, 0.2)"
+                    }}
+                  >
+                    {tech}
+                  </span>
+                )) : (
                   <span
                     className="badge px-4 py-2"
                     style={{
                       backgroundColor: "rgba(108, 117, 125, 0.2)",
                       color: "#6c757d",
                       borderRadius: "8px",
-                      fontSize: "14px",
+                      fontSize: "14px"
                     }}
                   >
                     {project.techStack}
@@ -363,174 +315,37 @@ const ProjectDetails = () => {
               </div>
             </div>
 
-            {/* ROLES
+            {/* ROLES */}
             {project.roles && (
               <div
                 className="card border-0 p-4 mb-4 shadow"
                 style={{
                   backgroundColor: "rgba(26, 29, 33, 0.6)",
                   borderRadius: "16px",
-                  border: "1px solid rgba(23, 162, 184, 0.15)",
+                  border: "1px solid rgba(23, 162, 184, 0.15)"
                 }}
               >
                 <h4 className="fw-bold text-info mb-4">
-                  Available roles 
-                  {Array.isArray(project.roles)
-                    ? project.roles.reduce((acc, r) => acc + (r.count || 0), 0)
-                    : 1}
+                  👥 Available Roles ({Array.isArray(project.roles) ? project.roles.length : 1})
                 </h4>
-
                 <div className="row g-3">
-                  {Array.isArray(project.roles) ? (
-                    project.roles.map((roleObj, i) => {
-                      const roleTaken = project.membersJoined?.some(
-                        (member) => member.role === roleObj.role,
-                      );
-
-                      return (
-                        <div key={i} className="col-md-6">
-                          <div
-                            className={`p-3 rounded-3 h-100 ${
-                              !roleTaken && !isFull ? "cursor-pointer" : ""
-                            }`}
-                            style={{
-                              backgroundColor:
-                                roleTaken || isFull
-                                  ? "rgba(108, 117, 125, 0.1)"
-                                  : "rgba(23, 162, 184, 0.08)",
-                              border: `1px solid ${
-                                roleTaken || isFull
-                                  ? "rgba(108, 117, 125, 0.2)"
-                                  : "rgba(23, 162, 184, 0.2)"
-                              }`,
-                              cursor:
-                                roleTaken || isFull ? "not-allowed" : "pointer",
-                              opacity: roleTaken || isFull ? 0.6 : 1,
-                            }}
-                            onClick={() => {
-                              if (!roleTaken && !isFull)
-                                setSelectedRole(roleObj.role); // ✅ string
-                            }}
-                          >
-                            <div className="form-check">
-                              <input
-                                className="form-check-input"
-                                type="radio"
-                                name="role"
-                                value={roleObj.role} // ✅
-                                checked={selectedRole === roleObj.role}
-                                disabled={roleTaken || isFull}
-                                onChange={(e) =>
-                                  setSelectedRole(e.target.value)
-                                }
-                                style={{
-                                  cursor:
-                                    roleTaken || isFull
-                                      ? "not-allowed"
-                                      : "pointer",
-                                }}
-                              />
-                              <label className="form-check-label d-flex justify-content-between align-items-center w-100">
-                                {/* ✅ role string, not object */}
-            {/* <h6 className="fw-bold text-white mb-0">
-                                  {roleObj.role}
-                                </h6>
-                                <span
-                                  className="badge px-3 py-1"
-                                  style={{
-                                    backgroundColor: roleTaken
-                                      ? "#6c757d20"
-                                      : "#28a74520",
-                                    color: roleTaken ? "#6c757d" : "#28a745",
-                                    borderRadius: "6px",
-                                    fontSize: "11px",
-                                  }}
-                                >
-                                  {roleTaken ? "Filled" : "Open"}
-                                </span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="col-12">
-                      <div
-                        className="p-4 rounded-3 text-center"
-                        style={{
-                          backgroundColor: "rgba(108, 117, 125, 0.05)",
-                          border: "1px solid rgba(108, 117, 125, 0.2)",
-                        }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )} } */}
-
-            {/* ROLES */}
-            {Array.isArray(project.roles) && project.roles.length > 0 && (
-              <div
-                className="card border-0 p-4 mb-4 shadow"
-                style={{
-                  backgroundColor: "rgba(26, 29, 33, 0.6)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(23, 162, 184, 0.15)",
-                }}
-              >
-                <h4 className="fw-bold text-info mb-4">
-                  Available roles{" "}
-                  {project.roles.reduce((acc, r) => {
-                    if (typeof r === "string") return acc + 1;
-                    return acc + (r.count || 0);
-                  }, 0)}
-                </h4>
-
-                <div className="row g-3">
-                  {project.roles.map((roleObj, i) => {
-                    const roleName =
-                      typeof roleObj === "string"
-                        ? roleObj
-                        : typeof roleObj === "object" && roleObj?.role
-                          ? roleObj.role
-                          : "Unknown Role";
-                          
-                    const roleCount =
-                      typeof roleObj === "string" ? 1 : roleObj?.count || 0;
-
-                    const joinedCount = Array.isArray(project.membersJoined)
-                      ? project.membersJoined.filter(
-                          (member) => member?.role === roleName,
-                        ).length
-                      : 0;
-
-                    const roleTaken = joinedCount >= roleCount;
+                  {Array.isArray(project.roles) ? project.roles.map((role, i) => {
+                    const roleTaken = project.membersJoined?.some(
+                      (member) => member.role === role
+                    );
 
                     return (
                       <div key={i} className="col-md-6">
                         <div
-                          className={`p-3 rounded-3 h-100 ${
-                            !roleTaken && !isFull ? "cursor-pointer" : ""
-                          }`}
+                          className={`p-3 rounded-3 h-100 ${!roleTaken && !isFull ? 'cursor-pointer' : ''}`}
                           style={{
-                            backgroundColor:
-                              roleTaken || isFull
-                                ? "rgba(108, 117, 125, 0.1)"
-                                : "rgba(23, 162, 184, 0.08)",
-                            border: `1px solid ${
-                              roleTaken || isFull
-                                ? "rgba(108, 117, 125, 0.2)"
-                                : "rgba(23, 162, 184, 0.2)"
-                            }`,
-                            cursor:
-                              roleTaken || isFull ? "not-allowed" : "pointer",
-                            opacity: roleTaken || isFull ? 0.6 : 1,
+                            backgroundColor: roleTaken || isFull ? "rgba(108, 117, 125, 0.1)" : "rgba(23, 162, 184, 0.08)",
+                            border: `1px solid ${roleTaken || isFull ? "rgba(108, 117, 125, 0.2)" : "rgba(23, 162, 184, 0.2)"}`,
+                            cursor: roleTaken || isFull ? "not-allowed" : "pointer",
+                            opacity: roleTaken || isFull ? 0.6 : 1
                           }}
                           onClick={() => {
-                            if (!roleTaken && !isFull && roleName) {
-                              setSelectedRole(roleName);
-                            }
+                            if (!roleTaken && !isFull) setSelectedRole(role);
                           }}
                         >
                           <div className="form-check">
@@ -538,55 +353,44 @@ const ProjectDetails = () => {
                               className="form-check-input"
                               type="radio"
                               name="role"
-                              value={
-                                typeof roleName === "string"
-                                  ? roleName
-                                  : roleName?.role
-                              }
-                              checked={
-                                selectedRole ===
-                                (typeof roleName === "string"
-                                  ? roleName
-                                  : roleName?.role)
-                              }
+                              value={role}
+                              checked={selectedRole === role}
                               disabled={roleTaken || isFull}
                               onChange={(e) => setSelectedRole(e.target.value)}
-                              style={{
-                                cursor:
-                                  roleTaken || isFull
-                                    ? "not-allowed"
-                                    : "pointer",
-                              }}
+                              style={{ cursor: roleTaken || isFull ? "not-allowed" : "pointer" }}
                             />
-
                             <label className="form-check-label d-flex justify-content-between align-items-center w-100">
-                              <h6 className="fw-bold text-white mb-0">
-                                {typeof roleName === "string"
-                                  ? roleName
-                                  : roleName?.role || "Unknown"}
-                              </h6>
-
+                              <h6 className="fw-bold text-white mb-0">{role}</h6>
                               <span
                                 className="badge px-3 py-1"
                                 style={{
-                                  backgroundColor: roleTaken
-                                    ? "#6c757d20"
-                                    : "#28a74520",
+                                  backgroundColor: roleTaken ? "#6c757d20" : "#28a74520",
                                   color: roleTaken ? "#6c757d" : "#28a745",
                                   borderRadius: "6px",
-                                  fontSize: "11px",
+                                  fontSize: "11px"
                                 }}
                               >
-                                {roleTaken
-                                  ? "Filled"
-                                  : `${joinedCount}/${roleCount} Open`}
+                                {roleTaken ? "Filled" : "Open"}
                               </span>
                             </label>
                           </div>
                         </div>
                       </div>
                     );
-                  })}
+                  }) : (
+                    <div className="col-12">
+                      <div
+                        className="p-4 rounded-3 text-center"
+                        style={{
+                          backgroundColor: "rgba(108, 117, 125, 0.05)",
+                          border: "1px solid rgba(108, 117, 125, 0.2)"
+                        }}
+                      >
+                        <h6 className="text-light mb-2">{project.roles}</h6>
+                        <small className="text-light opacity-50">Role information</small>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -598,17 +402,13 @@ const ProjectDetails = () => {
                 style={{
                   backgroundColor: "rgba(26, 29, 33, 0.6)",
                   borderRadius: "16px",
-                  border: "1px solid rgba(23, 162, 184, 0.15)",
+                  border: "1px solid rgba(23, 162, 184, 0.15)"
                 }}
               >
                 <h4 className="fw-bold text-info mb-3">🎯 Project Goals</h4>
                 <p
                   className="text-light mb-0"
-                  style={{
-                    lineHeight: "1.8",
-                    fontSize: "16px",
-                    color: "#a8b3c0",
-                  }}
+                  style={{ lineHeight: "1.8", fontSize: "16px", color: "#a8b3c0" }}
                 >
                   {project.goal}
                 </p>
@@ -618,13 +418,14 @@ const ProjectDetails = () => {
 
           {/* RIGHT SIDEBAR */}
           <div className="col-lg-4">
+
             {/* CREATOR CARD */}
             <div
               className="card border-0 p-4 mb-4 shadow text-center"
               style={{
                 backgroundColor: "rgba(26, 29, 33, 0.6)",
                 borderRadius: "16px",
-                border: "1px solid rgba(23, 162, 184, 0.15)",
+                border: "1px solid rgba(23, 162, 184, 0.15)"
               }}
             >
               <div
@@ -634,7 +435,7 @@ const ProjectDetails = () => {
                   height: "80px",
                   backgroundColor: "rgba(23, 162, 184, 0.2)",
                   border: "3px solid rgba(23, 162, 184, 0.3)",
-                  fontSize: "40px",
+                  fontSize: "40px"
                 }}
               >
                 👤
@@ -657,48 +458,37 @@ const ProjectDetails = () => {
               style={{
                 backgroundColor: "rgba(26, 29, 33, 0.6)",
                 borderRadius: "16px",
-                border: "1px solid rgba(23, 162, 184, 0.15)",
+                border: "1px solid rgba(23, 162, 184, 0.15)"
               }}
             >
               <h6 className="fw-bold text-info mb-3">📊 Quick Stats</h6>
 
-              <div
-                className="d-flex justify-content-between py-2 mb-2"
-                style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}
-              >
+              <div className="d-flex justify-content-between py-2 mb-2" style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}>
                 <small className="text-light">Status</small>
                 <span
                   className="badge px-2 py-1"
                   style={{
-                    backgroundColor:
-                      project.status === "open" ? "#28a74520" : "#6c757d20",
+                    backgroundColor: project.status === "open" ? "#28a74520" : "#6c757d20",
                     color: project.status === "open" ? "#28a745" : "#6c757d",
                     fontSize: "11px",
-                    borderRadius: "6px",
+                    borderRadius: "6px"
                   }}
                 >
                   {project.status?.toUpperCase() || "OPEN"}
                 </span>
               </div>
 
-              <div
-                className="d-flex justify-content-between py-2 mb-2"
-                style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}
-              >
+              <div className="d-flex justify-content-between py-2 mb-2" style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}>
                 <small className="text-light">Created</small>
                 <small className="fw-bold text-info">
                   {new Date(project.createdAt).toLocaleDateString()}
                 </small>
               </div>
 
-              <div
-                className="d-flex justify-content-between py-2 mb-2"
-                style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}
-              >
+              <div className="d-flex justify-content-between py-2 mb-2" style={{ borderBottom: "1px solid rgba(23, 162, 184, 0.1)" }}>
                 <small className="text-light">Members</small>
                 <small className="fw-bold text-info">
-                  {project.membersJoined?.length || 0}/
-                  {project.membersRequired || 0}
+                  {project.membersJoined?.length || 0}/{project.membersRequired || 0}
                 </small>
               </div>
 
@@ -716,10 +506,12 @@ const ProjectDetails = () => {
       <Footer />
 
       <JoinProjectModal
-        show={showModal}
-        onClose={() => setShowModal(false)}
-        project={project}
-      />
+      show={showModal}
+      onClose={() => setShowModal(false)}
+      project={project}
+    />
+
+
     </div>
   );
 };
