@@ -4,6 +4,7 @@ export function JoinProjectModal({ show, onClose, project }) {
   const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
   const [resume, setResume] = useState(null);
+  const [requested, setRequested] = useState(false);
 
   const handleSendRequest = async () => {
     console.log("clicked");
@@ -112,8 +113,8 @@ export function JoinProjectModal({ show, onClose, project }) {
             Cancel
           </button>
 
-          <button className="btn btn-info" onClick={handleSendRequest}>
-            Send Request
+          <button className="btn btn-info" onClick={handleSendRequest} disabled={requested}>
+            {requested ? "Request Sent" : "Send Request"}
           </button>
         </div>
       </div>

@@ -27,4 +27,5 @@ const joinRequestSchema = new mongoose.Schema(
 
 const JoinRequest = mongoose.model("JoinRequest", joinRequestSchema);
 
+joinRequestSchema.index({ project: 1, user: 1, role: 1 }, { unique: true });
 export default JoinRequest;

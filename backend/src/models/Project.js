@@ -35,11 +35,19 @@ const projectSchema = new mongoose.Schema(
     },
 
     roles: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+  {
+    role: {
+      type: String,
+      enum: ["Frontend", "Backend", "UI/UX Designer", "DevOps", "Full-stack"],
+      required: true,
+    },
+    count: {
+      type: Number,
+      required: true,
+      min: 1,
+    }
+  }
+],
 
     duration: String,
     goal: String,
